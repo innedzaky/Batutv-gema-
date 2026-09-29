@@ -1,0 +1,106 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Role-Based Access Control via Custom Claims
+    function hasRole(role) {
+      return isSignedIn() && request.auth.token.role == role;
+    }
+
+    // SuperAdmin check: verified via Custom Claims, with fallback to initial authorized emails
+    // during account custom claims migration window
+    function isSuperAdmin() {
+      return isSignedIn() && (
+        request.auth.token.role == 'superadmin' ||
+        request.auth.token.email == 'dzakyinne@gmail.com' ||
+        request.auth.token.email == 'innedzaky@gmail.com' ||
+        request.auth.token.email == 'rioirsyad72@gmail.com'
+      );
+    }
+
+    // ====================================================
+    // ARTICLES COLLECTION
+    // Public read-only ONLY for published articles.
+    // Public write is strictly forbidden (0 celah write publik).
+    // Admin write is restricted to authenticated superadmins/editors.
+    // ====================================================
+    match /articles/{articleId} {
+      allow read: if (resource != null && resource.data.status == 'published') || isSuperAdmin() || hasRole('editor');
+      allow write: if isSuperAdmin() || hasRole('editor');
+    }
+
+    // ====================================================
+    // USERS COLLECTION
+    // Closed to public; only authenticated user themselves or superadmin.
+    // ====================================================
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isSuperAdmin());
+      allow write: if isSuperAdmin();
+    }
+
+    // ====================================================
+    // TAXONOMIES (CATEGORIES & TAGS)
+    // Public read allowed, write strictly superadmin.
+    // ====================================================
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    match /tags/{tagId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    // ====================================================
+    // PORTAL CONTENT & CONFIGURATIONS
+    // Public read allowed for portal presentation, write strictly restricted to editorial staff.
+    // ====================================================
+    match /site_settings/{settingId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    match /navigation/{navId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    match /footer/{footerId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    match /pages/{pageId} {
+      allow read: if true;
+      allow write: if isSuperAdmin() || hasRole('editor');
+    }
+
+    match /authors/{authorId} {
+      allow read: if true;
+      allow write: if isSuperAdmin() || hasRole('editor');
+    }
+
+    match /videos/{videoId} {
+      allow read: if true;
+      allow write: if isSuperAdmin() || hasRole('editor');
+    }
+
+    match /system_settings/{settingId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    // ====================================================
+    // DEFAULT CATCH-ALL
+    // Strict default deny for any other collections.
+    // ====================================================
+    match /{document=**} {
+      allow read, write: if isSuperAdmin();
+    }
+  }
+}
