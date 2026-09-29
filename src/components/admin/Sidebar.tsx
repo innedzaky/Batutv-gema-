@@ -24,6 +24,7 @@ import {
   FolderTree,
   Image as ImageIcon,
   PanelBottom,
+  PanelRight,
   Sliders,
 } from 'lucide-react';
 import { BatuTVBrandLogo } from '../common/BatuTVBrandLogo';
@@ -430,7 +431,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (roleKey === 'admin' || roleKey === 'redaksi') {
       masterItems.push(
         {
-          name: 'Pages',
+          name: 'Halaman Informasi',
           path: '/batutv-control/pages',
           icon: FileText,
           badge: pagesCount.toString(),
@@ -441,6 +442,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           path: '/batutv-control/navigasi',
           icon: FolderTree,
           badge: navCount.toString(),
+          isReady: true,
+        },
+        {
+          name: 'Sidebar',
+          path: '/batutv-control/sidebar',
+          icon: PanelRight,
           isReady: true,
         },
         {

@@ -14,6 +14,7 @@ import { AuthorManagementModule } from './author/AuthorManagementModule';
 import { PageManagementModule } from './pages/PageManagementModule';
 import { NavigationManagementModule } from './navigation/NavigationManagementModule';
 import { FooterManagementModule } from './footer/FooterManagementModule';
+import { SidebarManagementModule } from './sidebar/SidebarManagementModule';
 import { SiteSettingsModule } from './settings/SiteSettingsModule';
 import { SystemSettingsModule } from './system/SystemSettingsModule';
 import { UserManagementModule } from './user/UserManagementModule';
@@ -71,9 +72,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         return 'Master Data Penulis';
       case '/batutv-control/pages':
       case '/batutv-control/master-data/pages':
-        return 'Master Data Pages';
+        return 'Halaman Informasi';
       case '/batutv-control/navigasi':
         return 'Manajemen Navigasi SO2';
+      case '/batutv-control/sidebar':
+      case '/batutv-control/master-data/sidebar':
+        return 'Pengaturan Sidebar';
       case '/batutv-control/footer':
       case '/batutv-control/master-data/footer':
         return 'Master Data Footer';
@@ -155,6 +159,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       case '/batutv-control/navigasi':
         return <NavigationManagementModule onNavigateToPublic={onNavigate} />;
+
+      case '/batutv-control/sidebar':
+      case '/batutv-control/master-data/sidebar':
+        return <SidebarManagementModule onNavigateToPublic={onNavigate} />;
 
       case '/batutv-control/footer':
       case '/batutv-control/master-data/footer':

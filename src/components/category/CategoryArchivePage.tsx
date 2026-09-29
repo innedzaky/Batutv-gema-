@@ -312,12 +312,12 @@ export const CategoryArchivePage: React.FC<CategoryArchivePageProps> = ({
 
       {/* MAIN CONTAINER — Max Width 980px Seragam Persis Homepage */}
       <div className="max-w-[980px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5 lg:pt-6">
-        {/* LAYOUT GRID: KIRI 8 COLS & KANAN 4 COLS (70% : 30%) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start">
+        {/* LAYOUT DUA KOLOM: KIRI KONTEN UTAMA FLUID & KANAN SIDEBAR 255px (ACUAN HOMEPAGE) */}
+        <div className="flex flex-col lg:flex-row items-start gap-5 lg:gap-6">
           {/* ========================================================================= */}
-          {/* KOLOM KIRI (Desktop: 8 COLS): HERO ARTIKEL + DAFTAR ARTIKEL + PAGINATION  */}
+          {/* KOLOM KIRI (Desktop: FLUID): HERO ARTIKEL + DAFTAR ARTIKEL + PAGINATION   */}
           {/* ========================================================================= */}
-          <main className="lg:col-span-8 space-y-6 w-full">
+          <main className="w-full lg:flex-1 lg:min-w-0 space-y-6">
             {matchingArticles.length === 0 ? (
               /* EMPTY STATE */
               <div className="bg-white rounded-2xl border border-slate-200 p-10 text-center space-y-4 shadow-xs">
@@ -595,9 +595,9 @@ export const CategoryArchivePage: React.FC<CategoryArchivePageProps> = ({
           </main>
 
           {/* ========================================================================= */}
-          {/* KOLOM KANAN (Desktop: 4 COLS): TERPOPULER WIDGET + DISKUSI TERPANAS        */}
+          {/* KOLOM KANAN (Desktop: 255px ACUAN HOMEPAGE): TERPOPULER + DISKUSI TERPANAS */}
           {/* ========================================================================= */}
-          <aside className="lg:col-span-4 space-y-5 w-full lg:sticky lg:top-[68px] self-start">
+          <aside className="w-full lg:w-[255px] lg:max-w-[255px] lg:shrink-0 space-y-5 lg:sticky lg:top-[68px] self-start">
             {/* 1. TERPOPULER WIDGET (Desain Persis Gambar 1) */}
             <TerpopulerWidget
               id="category-terpopuler"

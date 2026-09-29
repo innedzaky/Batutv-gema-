@@ -47,8 +47,9 @@ export const RolePermissionMatrixModal: React.FC<RolePermissionMatrixModalProps>
       category: 'MASTER DATA & TAMPILAN',
       items: [
         { name: 'Master Data Penulis', admin: true, redaksi: true, editor: 'Lihat Saja', reporter: false, kontributor: false },
-        { name: 'Master Data Halaman Statis (Pages)', admin: true, redaksi: true, editor: false, reporter: false, kontributor: false },
+        { name: 'Halaman Informasi', admin: true, redaksi: true, editor: false, reporter: false, kontributor: false },
         { name: 'Manajemen Navigasi SO2 Portal', admin: true, redaksi: true, editor: false, reporter: false, kontributor: false },
+        { name: 'Pengaturan Sidebar', admin: true, redaksi: true, editor: false, reporter: false, kontributor: false },
         { name: 'Master Data Footer & Site Settings', admin: true, redaksi: false, editor: false, reporter: false, kontributor: false },
       ],
     },

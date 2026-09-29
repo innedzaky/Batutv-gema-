@@ -37,6 +37,7 @@ import {
 import { getMediaById } from '../../data/mediaAdminStore';
 import { getStoredSiteSettings } from '../../data/siteSettingsStore';
 import { getBaseDomain } from '../../utils/seoGenerators';
+import { getStoredSidebarSettings, SIDEBAR_UPDATED_EVENT } from '../../data/sidebarAdminStore';
 import {
   extractYouTubeVideoId,
   getYouTubeThumbnailUrl,
@@ -93,6 +94,16 @@ export const VideoDetailPage: React.FC<VideoDetailPageProps> = ({
   onBookmark,
   isBookmarked = false,
 }) => {
+  const [videoSidebarCfg, setVideoSidebarCfg] = useState(() => getStoredSidebarSettings().video);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setVideoSidebarCfg(getStoredSidebarSettings().video);
+    };
+    window.addEventListener(SIDEBAR_UPDATED_EVENT, handleUpdate);
+    return () => window.removeEventListener(SIDEBAR_UPDATED_EVENT, handleUpdate);
+  }, []);
+
   // Resolve current video from slug or fallback to featured published video
   const currentVideo: DetailedVideoData = useMemo(() => {
     const allPublished = getPublishedLiveVideos();
@@ -421,13 +432,13 @@ export const VideoDetailPage: React.FC<VideoDetailPageProps> = ({
   return (
     <main
       id="video-detail-main"
-      className="flex-1 w-full bg-[#f8f9fa] py-3 sm:py-4 lg:py-5 font-sans"
+      className="flex-1 w-full bg-white py-3 sm:py-4 lg:py-5 font-sans"
     >
-      <div className="video-layout max-w-[980px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start">
+      <div className="video-layout max-w-[980px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row gap-5 lg:gap-6 items-start">
         {/* ============================================================ */}
-        {/* LEFT COLUMN: MAIN VIDEO CONTENT (8 COLS TO MATCH HOMEPAGE)   */}
+        {/* LEFT COLUMN: MAIN VIDEO CONTENT (FLUID TO MATCH CATEGORY)    */}
         {/* ============================================================ */}
-        <article className="video-page lg:col-span-8 w-full bg-white rounded-xl shadow-none p-4 sm:p-5 md:p-6">
+        <article className="video-page w-full lg:flex-1 lg:min-w-0">
           {/* 1. BREADCRUMB */}
           <nav aria-label="Breadcrumb" className="mb-4">
             <ol className="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm font-medium text-slate-500">
@@ -902,194 +913,223 @@ export const VideoDetailPage: React.FC<VideoDetailPageProps> = ({
         </article>
 
         {/* ============================================================ */}
-        {/* RIGHT COLUMN: SIDEBAR (4 COLS TO MATCH HOMEPAGE)             */}
+        {/* RIGHT COLUMN: SIDEBAR (255px TO MATCH CATEGORY & HOMEPAGE)  */}
         {/* ============================================================ */}
-        <aside className="video-sidebar lg:col-span-4 w-full space-y-5 lg:sticky lg:top-[68px] self-start">
-          {/* SECTION 1: POPULER (01 - 05) */}
-          <div className="bg-white rounded-xl border border-slate-100 p-4 sm:p-5 shadow-none">
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-              <h3 className="font-extrabold text-sm sm:text-base text-slate-900 flex items-center gap-2 tracking-tight">
-                <TrendingUp className="w-4 h-4 text-red-600" />
-                POPULER
-              </h3>
-              <span className="text-[11px] font-bold text-red-600 uppercase">
-                24 Jam Terakhir
-              </span>
-            </div>
-
-            <div className="divide-y divide-slate-100/80">
-              {defaultPopularNews.slice(0, 5).map((pop, idx) => (
-                <div
-                  key={pop.id || idx}
-                  className="py-3 first:pt-0 last:pb-0 flex items-start gap-3 group"
-                >
-                  <span
-                    className={`font-black text-xl leading-none w-6 text-center shrink-0 ${
-                      idx === 0
-                        ? 'text-red-600'
-                        : idx === 1
-                        ? 'text-amber-600'
-                        : idx === 2
-                        ? 'text-blue-600'
-                        : 'text-slate-400'
-                    }`}
-                  >
-                    0{idx + 1}
+        {/* RIGHT COLUMN: SIDEBAR (255px TO MATCH CATEGORY & HOMEPAGE)  */}
+        {/* ============================================================ */}
+        {videoSidebarCfg.enabled && (
+          <aside className={`video-sidebar w-full lg:w-[255px] lg:max-w-[255px] lg:shrink-0 space-y-5 self-start ${
+            videoSidebarCfg.sticky ? 'lg:sticky lg:top-[68px]' : ''
+          }`}>
+            {/* SECTION 1: POPULER */}
+            {videoSidebarCfg.popularWidget.enabled && (
+              <div className="bg-white rounded-xl border border-slate-100 p-4 sm:p-5 shadow-none">
+                <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                  <h3 className="font-extrabold text-sm sm:text-base text-slate-900 flex items-center gap-2 tracking-tight">
+                    <TrendingUp className="w-4 h-4 text-red-600" />
+                    {videoSidebarCfg.popularWidget.title || 'POPULER'}
+                  </h3>
+                  <span className="text-[11px] font-bold text-red-600 uppercase">
+                    {videoSidebarCfg.popularWidget.timeframe || '24 Jam Terakhir'}
                   </span>
-                  <div className="flex-1">
-                    <a
-                      href={`/berita/${pop.slug}`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onNavigate(`/berita/${pop.slug}`);
-                      }}
-                      className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-red-600 transition-colors line-clamp-2 leading-snug"
-                    >
-                      {pop.title}
-                    </a>
-                    {pop.category && (
-                      <span className="text-[10px] text-slate-400 font-semibold uppercase mt-1 block">
-                        {pop.category}
-                      </span>
-                    )}
-                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* SECTION 2: TRENDING TOPICS */}
-          <div className="bg-white rounded-xl border border-slate-100 p-4 sm:p-5 shadow-none">
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-              <h3 className="font-extrabold text-sm sm:text-base text-slate-900 flex items-center gap-2 tracking-tight">
-                <Flame className="w-4 h-4 text-orange-500 fill-orange-500" />
-                TRENDING
-              </h3>
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-              </span>
-            </div>
+                <div className="divide-y divide-slate-100/80">
+                  {defaultPopularNews.slice(0, videoSidebarCfg.popularWidget.limit || 5).map((pop, idx) => (
+                    <div
+                      key={pop.id || idx}
+                      className="py-3 first:pt-0 last:pb-0 flex items-start gap-3 group"
+                    >
+                      <span
+                        className={`font-black text-xl leading-none w-6 text-center shrink-0 ${
+                          idx === 0
+                            ? 'text-red-600'
+                            : idx === 1
+                            ? 'text-amber-600'
+                            : idx === 2
+                            ? 'text-blue-600'
+                            : 'text-slate-400'
+                        }`}
+                      >
+                        0{idx + 1}
+                      </span>
+                      <div className="flex-1">
+                        <a
+                          href={`/berita/${pop.slug}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onNavigate(`/berita/${pop.slug}`);
+                          }}
+                          className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-red-600 transition-colors line-clamp-2 leading-snug"
+                        >
+                          {pop.title}
+                        </a>
+                        {pop.category && (
+                          <span className="text-[10px] text-slate-400 font-semibold uppercase mt-1 block">
+                            {pop.category}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-            <div className="space-y-2">
-              {[
-                { name: 'Wisata Kota Batu', slug: 'wisata-kota-batu' },
-                { name: 'Agrowisata Bumiaji', slug: 'agrowisata-bumiaji' },
-                { name: 'Pariwisata Malang Raya', slug: 'pariwisata-malang-raya' },
-                { name: 'BatuTV Live Streaming', slug: 'batutv-live-streaming' },
-                { name: 'Kuliner Legendaris', slug: 'kuliner-legendaris' },
-              ].map((topic) => (
-                <a
-                  key={topic.slug}
-                  href={`/tag/${topic.slug}`}
-                  id={`sidebar-trend-${topic.slug}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (onSelectTag) {
-                      onSelectTag(topic.name);
-                    } else {
-                      onNavigate(`/tag/${topic.slug}`);
-                    }
-                  }}
-                  className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-red-50 hover:text-red-600 text-slate-700 text-xs font-bold transition-all border border-slate-100 hover:border-red-200"
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="text-orange-500">🔥</span>
-                    <span>{topic.name}</span>
-                  </span>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                </a>
-              ))}
-            </div>
-          </div>
+            {/* SECTION 2: TRENDING TOPICS */}
+            <div className="bg-white rounded-xl border border-slate-100 p-4 sm:p-5 shadow-none">
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                <h3 className="font-extrabold text-sm sm:text-base text-slate-900 flex items-center gap-2 tracking-tight">
+                  <Flame className="w-4 h-4 text-orange-500 fill-orange-500" />
+                  TRENDING
+                </h3>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+              </div>
 
-          {/* SECTION 3: VIDEO POPULER (DYNAMIC) */}
-          <div className="bg-white rounded-xl border border-slate-100 p-4 sm:p-5 shadow-none">
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-              <h3 className="font-extrabold text-sm sm:text-base text-slate-900 flex items-center gap-2 tracking-tight">
-                <Tv className="w-4 h-4 text-red-600" />
-                VIDEO POPULER
-              </h3>
-              <span className="text-[11px] font-bold text-slate-400">
-                Paling Ditonton
-              </span>
-            </div>
-
-            <div className="space-y-3">
-              {dynamicPopularVideos.map((popVid) => (
-                <div key={popVid.id} className="group flex gap-3 items-center">
+              <div className="space-y-2">
+                {[
+                  { name: 'Wisata Kota Batu', slug: 'wisata-kota-batu' },
+                  { name: 'Agrowisata Bumiaji', slug: 'agrowisata-bumiaji' },
+                  { name: 'Pariwisata Malang Raya', slug: 'pariwisata-malang-raya' },
+                  { name: 'BatuTV Live Streaming', slug: 'batutv-live-streaming' },
+                  { name: 'Kuliner Legendaris', slug: 'kuliner-legendaris' },
+                ].map((topic) => (
                   <a
-                    href={`/video/${popVid.slug}`}
+                    key={topic.slug}
+                    href={`/tag/${topic.slug}`}
+                    id={`sidebar-trend-${topic.slug}`}
                     onClick={(e) => {
                       e.preventDefault();
-                      onNavigate(`/video/${popVid.slug}`);
+                      if (onSelectTag) {
+                        onSelectTag(topic.name);
+                      } else {
+                        onNavigate(`/tag/${topic.slug}`);
+                      }
                     }}
-                    className="relative w-20 aspect-video rounded-md overflow-hidden bg-slate-900 shrink-0"
+                    className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-red-50 hover:text-red-600 text-slate-700 text-xs font-bold transition-all border border-slate-100 hover:border-red-200"
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="text-orange-500">🔥</span>
+                      <span>{topic.name}</span>
+                    </span>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* SECTION 3: VIDEO POPULER (DYNAMIC) */}
+            {videoSidebarCfg.relatedVideosWidget.enabled && (
+              <div className="bg-white rounded-xl border border-slate-100 p-4 sm:p-5 shadow-none">
+                <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                  <h3 className="font-extrabold text-sm sm:text-base text-slate-900 flex items-center gap-2 tracking-tight">
+                    <Tv className="w-4 h-4 text-red-600" />
+                    {videoSidebarCfg.relatedVideosWidget.title || 'VIDEO TERKAIT & TERBARU'}
+                  </h3>
+                  <span className="text-[11px] font-bold text-slate-400">
+                    Paling Ditonton
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {dynamicPopularVideos.slice(0, videoSidebarCfg.relatedVideosWidget.limit || 5).map((popVid) => (
+                    <div key={popVid.id} className="group flex gap-3 items-center">
+                      <a
+                        href={`/video/${popVid.slug}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onNavigate(`/video/${popVid.slug}`);
+                        }}
+                        className="relative w-20 aspect-video rounded-md overflow-hidden bg-slate-900 shrink-0"
+                      >
+                        <img
+                          src={popVid.thumbnailUrl}
+                          alt={popVid.title}
+                          width={120}
+                          height={70}
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        />
+                        <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
+                          <Play className="w-3 h-3 fill-white text-white" />
+                        </div>
+                        <div className="absolute bottom-0.5 right-0.5 px-1 py-0.2 bg-black/80 text-[9px] text-white font-bold rounded-2xs">
+                          {popVid.duration}
+                        </div>
+                      </a>
+
+                      <div className="flex-1 min-w-0">
+                        <a
+                          href={`/video/${popVid.slug}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onNavigate(`/video/${popVid.slug}`);
+                          }}
+                          className="font-bold text-xs text-slate-900 group-hover:text-red-600 transition-colors line-clamp-2 leading-snug"
+                        >
+                          {popVid.title}
+                        </a>
+                        <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1 mt-0.5">
+                          <Eye className="w-2.5 h-2.5" /> {popVid.views} views
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* SECTION 4: PROMO / AD SLOT */}
+            {videoSidebarCfg.adBannerWidget.enabled && (
+              videoSidebarCfg.adBannerWidget.imageUrl ? (
+                <div className="rounded-xl overflow-hidden border border-slate-200 shadow-xs bg-slate-50">
+                  <a
+                    href={videoSidebarCfg.adBannerWidget.targetUrl || '#'}
+                    target={videoSidebarCfg.adBannerWidget.targetUrl ? '_blank' : '_self'}
+                    rel="noopener noreferrer"
+                    className="block group"
                   >
                     <img
-                      src={popVid.thumbnailUrl}
-                      alt={popVid.title}
-                      width={120}
-                      height={70}
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      src={videoSidebarCfg.adBannerWidget.imageUrl}
+                      alt={videoSidebarCfg.adBannerWidget.title || 'Iklan Video'}
+                      className="w-full h-auto object-cover group-hover:opacity-95 transition-opacity"
                     />
-                    <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
-                      <Play className="w-3 h-3 fill-white text-white" />
-                    </div>
-                    <div className="absolute bottom-0.5 right-0.5 px-1 py-0.2 bg-black/80 text-[9px] text-white font-bold rounded-2xs">
-                      {popVid.duration}
-                    </div>
                   </a>
-
-                  <div className="flex-1 min-w-0">
-                    <a
-                      href={`/video/${popVid.slug}`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onNavigate(`/video/${popVid.slug}`);
-                      }}
-                      className="font-bold text-xs text-slate-900 group-hover:text-red-600 transition-colors line-clamp-2 leading-snug"
-                    >
-                      {popVid.title}
-                    </a>
-                    <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1 mt-0.5">
-                      <Eye className="w-2.5 h-2.5" /> {popVid.views} views
-                    </span>
-                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* SECTION 4: PROMO / AD SLOT */}
-          <div className="rounded-xl overflow-hidden border border-slate-200/80 bg-gradient-to-br from-slate-900 via-slate-800 to-red-950 p-4 sm:p-5 text-white shadow-xs">
-            <div className="text-[10px] uppercase font-bold tracking-widest text-red-400 mb-2">
-              [ PROMO / ADVERTISEMENT ]
-            </div>
-            <h4 className="font-extrabold text-sm sm:text-base leading-snug mb-1.5">
-              BatuTV Digital Streaming App
-            </h4>
-            <p className="text-xs text-slate-300 mb-3.5 leading-relaxed">
-              Nikmati siaran langsung HD, breaking news kilat, dan arsip program
-              terlengkap dalam genggaman Anda.
-            </p>
-            <button
-              type="button"
-              id="promo-download-btn"
-              onClick={() => {
-                const target = document.getElementById('footer-contact-section') || document.querySelector('footer');
-                if (target) {
-                  target.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
-              className="w-full py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <Tv className="w-3.5 h-3.5" />
-              Download Aplikasi Resmi
-            </button>
-          </div>
-        </aside>
+              ) : (
+                <div className="rounded-xl overflow-hidden border border-slate-200/80 bg-gradient-to-br from-slate-900 via-slate-800 to-red-950 p-4 sm:p-5 text-white shadow-xs">
+                  <div className="text-[10px] uppercase font-bold tracking-widest text-red-400 mb-2">
+                    [ PROMO / ADVERTISEMENT ]
+                  </div>
+                  <h4 className="font-extrabold text-sm sm:text-base leading-snug mb-1.5">
+                    {videoSidebarCfg.adBannerWidget.title || 'BatuTV Digital Streaming App'}
+                  </h4>
+                  <p className="text-xs text-slate-300 mb-3.5 leading-relaxed">
+                    Nikmati siaran langsung HD, breaking news kilat, dan arsip program
+                    terlengkap dalam genggaman Anda.
+                  </p>
+                  <button
+                    type="button"
+                    id="promo-download-btn"
+                    onClick={() => {
+                      const target = document.getElementById('footer-contact-section') || document.querySelector('footer');
+                      if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                    className="w-full py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Tv className="w-3.5 h-3.5" />
+                    Download Aplikasi Resmi
+                  </button>
+                </div>
+              )
+            )}
+          </aside>
+        )}
       </div>
     </main>
   );

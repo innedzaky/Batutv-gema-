@@ -100,7 +100,7 @@ export const PageListView: React.FC<PageListViewProps> = ({
             <span className="text-xs text-slate-400 font-medium">• Halaman Statis & Informasi</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
-            Manajemen Pages
+            Halaman Informasi
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
             Kelola halaman informasi, pedoman redaksi, kebijakan, dan kontak portal berita BatuTV.

@@ -85,7 +85,7 @@ const ALL_ENTITIES: EntityOption[] = [
   },
   {
     key: 'pages',
-    label: 'Pages (Informasi)',
+    label: 'Halaman Informasi',
     description: 'Halaman statis resmi (Tentang, Pedoman, Redaksi, dll.)',
     icon: FileText,
   },

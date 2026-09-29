@@ -30,6 +30,7 @@ import { resolveArticleSlug, resolveArticleHref } from '../../utils/slugResolver
 import { getOptimizedImageUrl } from '../../utils/imageOptimizer';
 import { getStoredSiteSettings } from '../../data/siteSettingsStore';
 import { getBaseDomain } from '../../utils/seoGenerators';
+import { getStoredSidebarSettings, SIDEBAR_UPDATED_EVENT } from '../../data/sidebarAdminStore';
 
 interface ArticleDetailPageProps {
   slug?: string;
@@ -312,9 +313,19 @@ export const ArticleDetailPage: React.FC<ArticleDetailPageProps> = ({
   onSelectTag,
   onSelectAuthor,
   onBookmark,
-  isBookmarked = false
+  isBookmarked = false,
 }) => {
   const [appDownloadToast, setAppDownloadToast] = useState(false);
+  const [isBookmarkedState, setIsBookmarkedState] = useState(isBookmarked);
+  const [sidebarCfg, setSidebarCfg] = useState(() => getStoredSidebarSettings().article);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setSidebarCfg(getStoredSidebarSettings().article);
+    };
+    window.addEventListener(SIDEBAR_UPDATED_EVENT, handleUpdate);
+    return () => window.removeEventListener(SIDEBAR_UPDATED_EVENT, handleUpdate);
+  }, []);
   const [activeReaction, setActiveReaction] = useState<string | null>(null);
   const [reactionCounts, setReactionCounts] = useState<{ [key: string]: number }>({
     '👍': 342,
@@ -881,17 +892,17 @@ export const ArticleDetailPage: React.FC<ArticleDetailPageProps> = ({
   const canonicalUrl = `${getBaseDomain()}/berita/${currentData.slug}`;
 
   return (
-    <main id="article-detail-main" className="flex-1 w-full bg-[#f8f9fa] py-3 sm:py-4 lg:py-5">
-      {/* Container max-width: 980px to match homepage */}
+    <main id="article-detail-main" className="flex-1 w-full bg-white py-3 sm:py-4 lg:py-5">
+      {/* Container max-width: 980px to match homepage and category */}
       <div className="max-w-[980px] mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* SEMANTIC 2-COLUMN LAYOUT MATCHING HOMEPAGE 8+4 COLS */}
-        <div className="article-layout grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start">
+        {/* 2-COLUMN LAYOUT: MAIN CONTENT FLUID + SIDEBAR 255px (ACUAN HOMEPAGE & KATEGORI) */}
+        <div className="article-layout flex flex-col lg:flex-row items-start gap-5 lg:gap-6">
 
           {/* ========================================================================= */}
-          {/* ARTICLE COLUMN (Desktop: 8 Cols to match homepage)                        */}
+          {/* ARTICLE COLUMN (Desktop: FLUID min-w-0 to match homepage & category)       */}
           {/* ========================================================================= */}
-          <article className="article-page lg:col-span-8 w-full bg-white rounded-xl shadow-none p-4 sm:p-5 md:p-6">
+          <article className="article-page w-full lg:flex-1 lg:min-w-0">
             
             {/* 1. BREADCRUMB */}
             <nav aria-label="Breadcrumb" className="mb-4 sm:mb-5">
@@ -1397,153 +1408,183 @@ export const ArticleDetailPage: React.FC<ArticleDetailPageProps> = ({
           </article>
 
           {/* ========================================================================= */}
-          {/* RIGHT SIDEBAR (Desktop: 4 Cols to match homepage)                         */}
+          {/* RIGHT SIDEBAR (Desktop: 255px to match homepage & category)               */}
           {/* ========================================================================= */}
-          <aside className="article-sidebar lg:col-span-4 w-full lg:sticky lg:top-[68px] self-start space-y-5">
-            
-            {/* S1. POPULAR ARTICLES (POPULER 01 - 05) */}
-            <div className="bg-white rounded-xl border border-slate-100 shadow-none p-4 sm:p-5">
-              <div className="flex items-center justify-between pb-3 mb-3.5 border-b border-slate-100">
-                <h3 className="text-sm font-black text-slate-900 flex items-center gap-2 tracking-wide uppercase">
-                  <TrendingUp className="w-4 h-4 text-red-600" />
-                  TERPOPULER
-                </h3>
-                <span className="text-[11px] font-bold text-slate-400">24 Jam Terakhir</span>
-              </div>
-
-              <div className="space-y-3.5">
-                {popularList.map((pop, idx) => (
-                  <a
-                    key={pop.id || idx}
-                    href={`/berita/${pop.slug}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onNavigate(`/berita/${pop.slug}`);
-                    }}
-                    className="flex items-start gap-3 group py-1"
-                  >
-                    <span className={`text-xl font-black shrink-0 w-7 text-center leading-none mt-0.5 ${
-                      idx === 0 ? 'text-red-600' : idx === 1 ? 'text-orange-500' : 'text-slate-300'
-                    }`}>
-                      {String(idx + 1).padStart(2, '0')}
+          {sidebarCfg.enabled && (
+            <aside className={`article-sidebar w-full lg:w-[255px] lg:max-w-[255px] lg:shrink-0 self-start space-y-5 ${
+              sidebarCfg.sticky ? 'lg:sticky lg:top-[68px]' : ''
+            }`}>
+              
+              {/* S1. POPULAR ARTICLES */}
+              {sidebarCfg.popularWidget.enabled && (
+                <div className="bg-white rounded-xl border border-slate-100 shadow-none p-4 sm:p-5">
+                  <div className="flex items-center justify-between pb-3 mb-3.5 border-b border-slate-100">
+                    <h3 className="text-sm font-black text-slate-900 flex items-center gap-2 tracking-wide uppercase">
+                      <TrendingUp className="w-4 h-4 text-red-600" />
+                      {sidebarCfg.popularWidget.title || 'TERPOPULER'}
+                    </h3>
+                    <span className="text-[11px] font-bold text-slate-400">
+                      {sidebarCfg.popularWidget.timeframe || '24 Jam Terakhir'}
                     </span>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-xs sm:text-[13px] font-bold text-slate-900 group-hover:text-red-600 transition-colors line-clamp-2 leading-snug">
-                        {pop.title}
-                      </h4>
-                      <div className="flex items-center gap-2 text-[10.5px] text-slate-400 mt-1">
-                        <span className="font-semibold text-red-500">{pop.category || 'Nasional'}</span>
-                        <span>·</span>
-                        <span>{pop.date || 'Hari ini'}</span>
-                      </div>
+                  </div>
+
+                  <div className="space-y-3.5">
+                    {popularList.slice(0, sidebarCfg.popularWidget.limit || 5).map((pop, idx) => (
+                      <a
+                        key={pop.id || idx}
+                        href={`/berita/${pop.slug}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onNavigate(`/berita/${pop.slug}`);
+                        }}
+                        className="flex items-start gap-3 group py-1"
+                      >
+                        <span className={`text-xl font-black shrink-0 w-7 text-center leading-none mt-0.5 ${
+                          idx === 0 ? 'text-red-600' : idx === 1 ? 'text-orange-500' : 'text-slate-300'
+                        }`}>
+                          {String(idx + 1).padStart(2, '0')}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-xs sm:text-[13px] font-bold text-slate-900 group-hover:text-red-600 transition-colors line-clamp-2 leading-snug">
+                            {pop.title}
+                          </h4>
+                          <div className="flex items-center gap-2 text-[10.5px] text-slate-400 mt-1">
+                            <span className="font-semibold text-red-500">{pop.category || 'Nasional'}</span>
+                            <span>·</span>
+                            <span>{pop.date || 'Hari ini'}</span>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* S2. DISKUSI TERPANAS */}
+              {sidebarCfg.discussionWidget.enabled && (
+                <div className="bg-white rounded-xl border border-slate-100 shadow-none p-4 sm:p-5">
+                  <div className="flex items-center justify-between pb-3 mb-3.5 border-b border-slate-100">
+                    <h3 className="text-sm font-black text-slate-900 flex items-center gap-2 tracking-wide uppercase">
+                      <Flame className="w-4 h-4 text-red-600" />
+                      {sidebarCfg.discussionWidget.title || 'DISKUSI TERPANAS'}
+                    </h3>
+                    <span className="text-[11px] font-bold text-red-600 animate-pulse">LIVE</span>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {trendingTopics.slice(0, sidebarCfg.discussionWidget.limit || 5).map((topic) => (
+                      <a
+                        key={topic.slug}
+                        href={`/tag/${topic.slug}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onNavigate(`/tag/${topic.slug}`);
+                        }}
+                        className="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-red-50/80 hover:text-red-600 transition group border border-slate-100"
+                      >
+                        <span className="text-xs font-bold text-slate-800 group-hover:text-red-600 flex items-center gap-1.5">
+                          <span className="text-red-500">🔥</span> #{topic.tag}
+                        </span>
+                        <span className="text-[10px] text-slate-400 group-hover:text-red-500 font-medium">
+                          {topic.count}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* S3. TOP WRITERS & TAGS */}
+              {sidebarCfg.topicsWidget.enabled && (
+                <div className="bg-white rounded-xl border border-slate-100 shadow-none p-4 sm:p-5">
+                  <div className="flex items-center justify-between pb-3 mb-3.5 border-b border-slate-100">
+                    <h3 className="text-sm font-black text-slate-900 flex items-center gap-2 tracking-wide uppercase">
+                      <User className="w-4 h-4 text-red-600" />
+                      {sidebarCfg.topicsWidget.title || 'TOP WRITERS'}
+                    </h3>
+                    <span className="text-[11px] font-bold text-slate-400">Redaksi</span>
+                  </div>
+
+                  <div className="space-y-3">
+                    {topWriters.slice(0, sidebarCfg.topicsWidget.limit || 4).map((writer) => (
+                      <a
+                        key={writer.name}
+                        href={`/penulis/${writer.name.toLowerCase().replace(/\s+/g, '-')}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (onSelectAuthor) onSelectAuthor(writer.name.toLowerCase().replace(/\s+/g, '-'));
+                          onNavigate(`/penulis/${writer.name.toLowerCase().replace(/\s+/g, '-')}`);
+                        }}
+                        className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50 transition group"
+                      >
+                        <img
+                          src={getOptimizedImageUrl(writer.avatar, 'thumbnail')}
+                          alt={writer.name}
+                          width={40}
+                          height={40}
+                          className="w-9 h-9 rounded-full object-cover border border-slate-200"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-xs font-bold text-slate-900 group-hover:text-red-600 truncate">
+                            {writer.name}
+                          </h4>
+                          <p className="text-[10.5px] text-slate-400 truncate">{writer.role}</p>
+                        </div>
+                        <span className="text-[10.5px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100">
+                          {writer.articles} Artikel
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* S4. ADVERTISEMENT / BANNER SLOT */}
+              {sidebarCfg.adBannerWidget.enabled && (
+                sidebarCfg.adBannerWidget.imageUrl ? (
+                  <div className="rounded-xl overflow-hidden border border-slate-200 shadow-xs bg-slate-50">
+                    <a
+                      href={sidebarCfg.adBannerWidget.targetUrl || '#'}
+                      target={sidebarCfg.adBannerWidget.targetUrl ? '_blank' : '_self'}
+                      rel="noopener noreferrer"
+                      className="block group"
+                    >
+                      <img
+                        src={sidebarCfg.adBannerWidget.imageUrl}
+                        alt={sidebarCfg.adBannerWidget.title || 'Iklan Sponsor'}
+                        className="w-full h-auto object-cover group-hover:opacity-95 transition-opacity"
+                      />
+                    </a>
+                  </div>
+                ) : (
+                  <div className="bg-gradient-to-br from-slate-900 to-[#1e0329] rounded-xl text-white p-5 text-center shadow-md relative overflow-hidden border border-purple-900/40">
+                    <div className="absolute top-2 right-2 bg-red-600/80 text-[9px] font-black px-1.5 py-0.5 rounded text-white tracking-widest uppercase">
+                      SPONSORED
                     </div>
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* S2. TRENDING TOPICS (🔥 TRENDING) */}
-            <div className="bg-white rounded-xl border border-slate-100 shadow-none p-4 sm:p-5">
-              <div className="flex items-center justify-between pb-3 mb-3.5 border-b border-slate-100">
-                <h3 className="text-sm font-black text-slate-900 flex items-center gap-2 tracking-wide uppercase">
-                  <Flame className="w-4 h-4 text-red-600" />
-                  DISKUSI TERPANAS
-                </h3>
-                <span className="text-[11px] font-bold text-red-600 animate-pulse">LIVE</span>
-              </div>
-
-              <div className="space-y-2.5">
-                {trendingTopics.map((topic) => (
-                  <a
-                    key={topic.slug}
-                    href={`/tag/${topic.slug}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onNavigate(`/tag/${topic.slug}`);
-                    }}
-                    className="flex items-center justify-between p-2 rounded-lg bg-slate-50 hover:bg-red-50/80 hover:text-red-600 transition group border border-slate-100"
-                  >
-                    <span className="text-xs font-bold text-slate-800 group-hover:text-red-600 flex items-center gap-1.5">
-                      <span className="text-red-500">🔥</span> #{topic.tag}
-                    </span>
-                    <span className="text-[10px] text-slate-400 group-hover:text-red-500 font-medium">
-                      {topic.count}
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* S3. TOP WRITERS / JURNALIS PILIHAN */}
-            <div className="bg-white rounded-xl border border-slate-100 shadow-none p-4 sm:p-5">
-              <div className="flex items-center justify-between pb-3 mb-3.5 border-b border-slate-100">
-                <h3 className="text-sm font-black text-slate-900 flex items-center gap-2 tracking-wide uppercase">
-                  <User className="w-4 h-4 text-red-600" />
-                  TOP WRITERS
-                </h3>
-                <span className="text-[11px] font-bold text-slate-400">Redaksi</span>
-              </div>
-
-              <div className="space-y-3">
-                {topWriters.map((writer) => (
-                  <a
-                    key={writer.name}
-                    href={`/penulis/${writer.name.toLowerCase().replace(/\s+/g, '-')}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (onSelectAuthor) onSelectAuthor(writer.name.toLowerCase().replace(/\s+/g, '-'));
-                      onNavigate(`/penulis/${writer.name.toLowerCase().replace(/\s+/g, '-')}`);
-                    }}
-                    className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50 transition group"
-                  >
-                    <img
-                      src={getOptimizedImageUrl(writer.avatar, 'thumbnail')}
-                      alt={writer.name}
-                      width={40}
-                      height={40}
-                      className="w-9 h-9 rounded-full object-cover border border-slate-200"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-xs font-bold text-slate-900 group-hover:text-red-600 truncate">
-                        {writer.name}
-                      </h4>
-                      <p className="text-[10.5px] text-slate-400 truncate">{writer.role}</p>
+                    <div className="w-12 h-12 mx-auto rounded-xl bg-red-600/20 border border-red-500/40 flex items-center justify-center mb-3 text-red-400">
+                      <Sparkles className="w-6 h-6" />
                     </div>
-                    <span className="text-[10.5px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100">
-                      {writer.articles} Artikel
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* S4. OPTIONAL PROMO / ADVERTISEMENT SLOT */}
-            <div className="bg-gradient-to-br from-slate-900 to-[#1e0329] rounded-xl text-white p-5 text-center shadow-md relative overflow-hidden border border-purple-900/40">
-              <div className="absolute top-2 right-2 bg-red-600/80 text-[9px] font-black px-1.5 py-0.5 rounded text-white tracking-widest uppercase">
-                SPONSORED
-              </div>
-              <div className="w-12 h-12 mx-auto rounded-xl bg-red-600/20 border border-red-500/40 flex items-center justify-center mb-3 text-red-400">
-                <Sparkles className="w-6 h-6" />
-              </div>
-              <h4 className="font-black text-sm tracking-tight mb-1">
-                BatuTV Mobile Digital App
-              </h4>
-              <p className="text-xs text-slate-300 mb-4 leading-relaxed">
-                Dapatkan notifikasi berita terkini langsung di smartphone Anda. Gratis &amp; ringan!
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setAppDownloadToast(true);
-                  setTimeout(() => setAppDownloadToast(false), 3500);
-                }}
-                className="w-full py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg transition shadow-sm cursor-pointer"
-              >
-                Unduh Aplikasi Sekarang
-              </button>
-            </div>
-
-          </aside>
+                    <h4 className="font-black text-sm tracking-tight mb-1">
+                      {sidebarCfg.adBannerWidget.title || 'BatuTV Mobile Digital App'}
+                    </h4>
+                    <p className="text-xs text-slate-300 mb-4 leading-relaxed">
+                      Dapatkan notifikasi berita terkini langsung di smartphone Anda. Gratis &amp; ringan!
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAppDownloadToast(true);
+                        setTimeout(() => setAppDownloadToast(false), 3500);
+                      }}
+                      className="w-full py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-lg transition shadow-sm cursor-pointer"
+                    >
+                      Unduh Aplikasi Sekarang
+                    </button>
+                  </div>
+                )
+              )}
+            </aside>
+          )}
 
         </div>
 

@@ -165,13 +165,13 @@ export const checkRoutePermission = (
   // 7. Master Data Pages, Navigasi, Footer, Site Settings
   if (path.startsWith('/batutv-control/pages') || path.startsWith('/batutv-control/master-data/pages')) {
     if (role === 'admin' || role === 'redaksi') {
-      return { allowed: true, role, moduleName: 'Master Data Halaman Statis (Pages)' };
+      return { allowed: true, role, moduleName: 'Halaman Informasi' };
     }
     return {
       allowed: false,
       role,
       requiredRoleName: 'Administrator atau Dewan Redaksi',
-      moduleName: 'Master Data Pages',
+      moduleName: 'Halaman Informasi',
       reason: 'Halaman statis portal (Tentang Kami, Pedoman Siber, dll) dilindungi untuk Administrator & Redaksi.',
     };
   }
@@ -186,6 +186,19 @@ export const checkRoutePermission = (
       requiredRoleName: 'Administrator atau Dewan Redaksi',
       moduleName: 'Manajemen Navigasi',
       reason: 'Susunan menu navigasi portal utama hanya boleh diubah oleh Administrator dan Redaksi.',
+    };
+  }
+
+  if (path.startsWith('/batutv-control/sidebar') || path.startsWith('/batutv-control/master-data/sidebar')) {
+    if (role === 'admin' || role === 'redaksi') {
+      return { allowed: true, role, moduleName: 'Pengaturan Sidebar' };
+    }
+    return {
+      allowed: false,
+      role,
+      requiredRoleName: 'Administrator atau Dewan Redaksi',
+      moduleName: 'Pengaturan Sidebar',
+      reason: 'Pengaturan komponen sidebar hanya boleh diubah oleh Administrator dan Redaksi.',
     };
   }
 

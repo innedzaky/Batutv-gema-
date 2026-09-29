@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   TrendingSidebarItem,
   SidebarSpecialCardData,
@@ -11,6 +11,7 @@ import {
 } from '../data/latestNewsData';
 import { NewsArticle } from '../types/news';
 import { SidebarAdBannerSlot } from './NewsHomepageLayout';
+import { getStoredSidebarSettings, SIDEBAR_UPDATED_EVENT } from '../data/sidebarAdminStore';
 
 export interface SharedSidebarProps {
   popularNews?: PopularNewsItemData[];
@@ -66,6 +67,16 @@ export const SharedSidebar: React.FC<SharedSidebarProps> = ({
   onSelectViralTopic,
   className = '',
 }) => {
+  const [cfg, setCfg] = useState(() => getStoredSidebarSettings().homepage);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setCfg(getStoredSidebarSettings().homepage);
+    };
+    window.addEventListener(SIDEBAR_UPDATED_EVENT, handleUpdate);
+    return () => window.removeEventListener(SIDEBAR_UPDATED_EVENT, handleUpdate);
+  }, []);
+
   const handlePopularClick = (e: React.MouseEvent<HTMLAnchorElement>, item: PopularNewsItemData) => {
     e.preventDefault();
     if (onSelectPopular) {
@@ -96,6 +107,27 @@ export const SharedSidebar: React.FC<SharedSidebarProps> = ({
     }
   };
 
+  if (!cfg.enabled) {
+    return null;
+  }
+
+  const isPopularActive = cfg.popularWidget.enabled && showPopular;
+  const popularTitle = cfg.popularWidget.title || 'BERITA TERPOPULER';
+  const popularLimit = cfg.popularWidget.limit || 4;
+
+  const isSpecialActive = cfg.specialEventWidget.enabled || showSpecialEvent;
+  const isAdActive = cfg.adBannerWidget.enabled || showAdBanner;
+  const adImg = cfg.adBannerWidget.imageUrl || adBannerUrl;
+  const adTarget = cfg.adBannerWidget.targetUrl || adTargetUrl;
+
+  const isTrendingActive = cfg.trendingWidget.enabled && showTrending;
+  const trendingTitle = cfg.trendingWidget.title || 'TRENDING';
+  const trendingLimit = cfg.trendingWidget.limit || 5;
+
+  const isViralActive = cfg.viralTopicsWidget.enabled && showViralTopics;
+  const viralTitle = cfg.viralTopicsWidget.title || 'VIRAL';
+  const viralLimit = cfg.viralTopicsWidget.limit || 5;
+
   return (
     <aside
       id="batutv-shared-sidebar"
@@ -103,7 +135,7 @@ export const SharedSidebar: React.FC<SharedSidebarProps> = ({
       className={`shared-sidebar w-full space-y-6 lg:space-y-6 ${className}`}
     >
       {/* 1. BERITA TERPOPULER WIDGET (S04) */}
-      {showPopular && popularNews && popularNews.length > 0 && (
+      {isPopularActive && popularNews && popularNews.length > 0 && (
         <div
           id="sidebar-popular-widget"
           className="popular-widget bg-white rounded-xl border border-slate-100 p-4 sm:p-5 shadow-none"
@@ -114,7 +146,7 @@ export const SharedSidebar: React.FC<SharedSidebarProps> = ({
               id="sidebar-popular-title"
               className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase font-sans"
             >
-              BERITA TERPOPULER
+              {popularTitle}
             </h3>
             {/* Short Red Accent Line */}
             <div
@@ -125,7 +157,7 @@ export const SharedSidebar: React.FC<SharedSidebarProps> = ({
 
           {/* Popular List with Circular Number Badges */}
           <div className="divide-y divide-slate-100/80">
-            {popularNews.slice(0, 4).map((item) => (
+            {popularNews.slice(0, popularLimit).map((item) => (
               <article
                 key={item.id || item.rank}
                 id={`sidebar-popular-item-${item.rank}`}
@@ -169,7 +201,7 @@ export const SharedSidebar: React.FC<SharedSidebarProps> = ({
       )}
 
       {/* 2. SPECIAL EVENT / EDITORIAL CARD (Optional) */}
-      {showSpecialEvent && specialEvent && (
+      {isSpecialActive && (
         <div
           id="sidebar-special-card"
           className="bg-[#0b1320] text-white rounded-xl p-5 sm:p-6 border border-slate-800/80 shadow-sm relative overflow-hidden group"
@@ -183,61 +215,41 @@ export const SharedSidebar: React.FC<SharedSidebarProps> = ({
           <div className="relative z-10 space-y-4">
             <div>
               <span className="text-[11px] font-extrabold uppercase tracking-widest text-red-500 block mb-1">
-                AGENDA SPESIAL BATUTV
+                {cfg.specialEventWidget.eventBadge || specialEvent?.eventDate || 'AGENDA SPESIAL BATUTV'}
               </span>
               <h3 className="text-base sm:text-lg font-black text-white leading-snug tracking-tight font-sans">
-                {specialEvent.title}
+                {cfg.specialEventWidget.eventTitle || specialEvent?.title}
               </h3>
-              {specialEvent.subtitle && (
+              {(cfg.specialEventWidget.eventDescription || specialEvent?.subtitle) && (
                 <p className="text-xs text-slate-300 font-medium mt-1">
-                  {specialEvent.subtitle}
+                  {cfg.specialEventWidget.eventDescription || specialEvent?.subtitle}
                 </p>
               )}
             </div>
 
-            <div className="space-y-2 text-xs border-y border-slate-800/80 py-3">
-              {specialEvent.eventDate && (
-                <div className="text-slate-300">
-                  <span className="text-slate-400 block text-[11px]">Jadwal Siaran:</span>
-                  <span className="font-semibold text-white">{specialEvent.eventDate}</span>
-                </div>
-              )}
-              {specialEvent.speaker && (
-                <div className="text-slate-300">
-                  <span className="text-slate-400 block text-[11px]">Narasumber:</span>
-                  <span className="font-semibold text-white">{specialEvent.speaker}</span>
-                  {specialEvent.speakerDate && (
-                    <span className="block text-[11px] text-slate-400 mt-0.5">
-                      {specialEvent.speakerDate}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-
             <a
-              href={specialEvent.href}
+              href={cfg.specialEventWidget.actionUrl || specialEvent?.href || '/kategori/wisata'}
               onClick={handleSpecialEventClick}
               className="inline-flex items-center justify-center w-full px-4 py-2.5 rounded-full border border-white/80 text-white hover:bg-white hover:text-slate-950 font-black text-xs uppercase tracking-wider transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
             >
-              <span>{specialEvent.buttonText}</span>
+              <span>{cfg.specialEventWidget.actionText || specialEvent?.buttonText || 'Lihat Liputan'}</span>
             </a>
           </div>
         </div>
       )}
 
       {/* 2.5 OPTIONAL MEDIUM AD BANNER SLOT (255px x 213px) */}
-      {showAdBanner && (
+      {isAdActive && (
         <SidebarAdBannerSlot
           id="sidebar-ad-medium"
           size={adBannerSize}
-          bannerUrl={adBannerUrl}
-          targetUrl={adTargetUrl}
+          bannerUrl={adImg}
+          targetUrl={adTarget}
         />
       )}
 
       {/* 3. TRENDING WIDGET */}
-      {showTrending && (
+      {isTrendingActive && (
         <div id="sidebar-trending-widget" className="trending-widget bg-white rounded-xl border border-slate-100 p-4 sm:p-5 shadow-none">
           {/* Section Header */}
           <div className="mb-3.5 sm:mb-4">
@@ -245,7 +257,7 @@ export const SharedSidebar: React.FC<SharedSidebarProps> = ({
               id="sidebar-trending-title"
               className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase font-sans"
             >
-              TRENDING
+              {trendingTitle}
             </h3>
             {/* Short Red Accent Line */}
             <div
@@ -256,7 +268,7 @@ export const SharedSidebar: React.FC<SharedSidebarProps> = ({
 
           {/* Trending News List */}
           <div className="divide-y divide-slate-100/80">
-            {trendingItems.map((item, idx) => (
+            {trendingItems.slice(0, trendingLimit).map((item, idx) => (
               <article
                 key={item.id || idx}
                 id={`sidebar-trending-item-${item.id}`}
@@ -318,7 +330,7 @@ export const SharedSidebar: React.FC<SharedSidebarProps> = ({
       )}
 
       {/* 4. VIRAL TOPIC WIDGET */}
-      {showViralTopics && viralTopics && viralTopics.length > 0 && (
+      {isViralActive && viralTopics && viralTopics.length > 0 && (
         <div id="sidebar-viral-widget" className="viral-widget bg-white rounded-xl border border-slate-100 p-4 sm:p-5 shadow-none">
           {/* Section Header */}
           <div className="mb-3.5 sm:mb-4">
@@ -326,7 +338,7 @@ export const SharedSidebar: React.FC<SharedSidebarProps> = ({
               id="sidebar-viral-title"
               className="text-lg sm:text-xl font-black text-slate-900 tracking-tight uppercase font-sans"
             >
-              VIRAL
+              {viralTitle}
             </h3>
             {/* Short Red Accent Line */}
             <div
@@ -337,7 +349,7 @@ export const SharedSidebar: React.FC<SharedSidebarProps> = ({
 
           {/* Viral Topics Ranked List */}
           <div className="divide-y divide-slate-100/80">
-            {viralTopics.map((topic, idx) => (
+            {viralTopics.slice(0, viralLimit).map((topic, idx) => (
               <article
                 key={topic.rank || idx}
                 id={`sidebar-viral-item-${topic.rank}`}
