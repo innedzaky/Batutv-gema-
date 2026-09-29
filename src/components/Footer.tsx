@@ -78,7 +78,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateAdmin, onNavigate }) =
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
       />
 
-      <div className="w-full max-w-[1020px] mx-auto px-3.5 sm:px-4 md:px-0 flex flex-col items-center text-center">
+      <div className="w-full max-w-[980px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
         
         {/* ========================================================= */}
         {/* 0. BRAND LOGO: BatuTV (Footer Centered Vector)            */}

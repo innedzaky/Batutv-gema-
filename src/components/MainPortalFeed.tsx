@@ -130,13 +130,13 @@ export const MainPortalFeed: React.FC<MainPortalFeedProps> = ({
       id="main-portal-feed-so4-so7"
       className="main-portal-feed-section w-full py-2 sm:py-4 pb-10 sm:pb-16 select-none"
     >
-      <div className="w-full max-w-[1020px] mx-auto px-3.5 sm:px-4 md:px-0">
-        <div className="w-full flex flex-col md:flex-row items-start md:gap-[34px] gap-8">
+      <div className="w-full max-w-[980px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full flex flex-col md:flex-row items-start md:gap-6 gap-8">
           
           {/* ========================================================= */}
-          {/* LEFT COLUMN: MAIN CONTENT (SO4 + SO5 + SO6 + SO7) (731px) */}
+          {/* LEFT COLUMN: MAIN CONTENT (SO4 + SO5 + SO6 + SO7) (Fluid) */}
           {/* ========================================================= */}
-          <div className="w-full md:w-[731px] md:max-w-[731px] md:shrink-0 flex flex-col space-y-8 sm:space-y-10">
+          <div className="w-full md:flex-1 md:min-w-0 flex flex-col space-y-8 sm:space-y-10">
             
             {/* ------------------------------------------------------- */}
             {/* S04 — BATUTV SHORTS (128px x 227px - 9:16 Portrait)     */}

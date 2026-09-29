@@ -568,6 +568,7 @@ export default function App() {
         currentUser={authAdmin}
         onOpenMenu={() => setIsMobileMenuOpen(true)}
         onGoHome={handleGoHome}
+        isCategoryPage={isCategoryArchivePage}
       />
 
       {/* S02 — PRIMARY NAVIGATION (Sticky pinned to top of viewport like kompas.tv / tvonenews) */}
@@ -585,6 +586,7 @@ export default function App() {
           setSearchInitialQuery('');
           setIsSearchOpen(true);
         }}
+        isCategoryPage={isCategoryArchivePage}
       />
 
       {/* MAIN CONTENT AREA */}

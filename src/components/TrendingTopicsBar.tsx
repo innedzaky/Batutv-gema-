@@ -65,7 +65,7 @@ export const TrendingTopicsBar: React.FC<TrendingTopicsBarProps> = ({
 
   return (
     <div id="trending-topics-bar" className="w-full bg-transparent py-1.5 sm:py-2 select-none">
-      <div className="w-full max-w-[1020px] mx-auto px-3.5 sm:px-4 md:px-0">
+      <div className="w-full max-w-[980px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white border border-[#940a13]/40 rounded-lg shadow-xs px-3.5 py-2 flex items-center gap-3 overflow-hidden">
           {/* Label # TOPIK */}
           <div className="flex items-center gap-1 text-xs sm:text-[13px] font-black text-[#940a13] uppercase tracking-wider flex-shrink-0">

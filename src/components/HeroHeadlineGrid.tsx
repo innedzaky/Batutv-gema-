@@ -148,13 +148,13 @@ export const HeroHeadlineGrid: React.FC<HeroHeadlineGridProps> = ({
       aria-label="Berita Utama & Headline"
       className="hero-headline-section w-full pt-3 sm:pt-4 md:pt-5 pb-3 sm:pb-4 md:pb-5 select-none"
     >
-      <div className="hero-headline-container w-full max-w-[1020px] mx-auto px-3.5 sm:px-4 md:px-0">
-        <div className="w-full flex flex-col md:flex-row items-start md:gap-[34px] gap-6">
+      <div className="hero-headline-container w-full max-w-[980px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full flex flex-col md:flex-row items-start md:gap-6 gap-6">
           
           {/* ========================================================= */}
-          {/* MAIN COLUMN (Mobile/Tablet: Full width | Desktop: 731px)  */}
+          {/* MAIN COLUMN (Mobile/Tablet: Full width | Desktop: Flex-1)  */}
           {/* ========================================================= */}
-          <div className="w-full md:w-[731px] md:max-w-[731px] md:shrink-0 flex flex-col space-y-4 sm:space-y-5">
+          <div className="w-full md:flex-1 md:min-w-0 flex flex-col space-y-4 sm:space-y-5">
             
             {/* ------------------------------------------------------- */}
             {/* S03.1 — MAIN HEADLINE CARD (731px x 411px - 16:9)       */}
@@ -201,8 +201,8 @@ export const HeroHeadlineGrid: React.FC<HeroHeadlineGridProps> = ({
                 </a>
               </div>
 
-              {/* DESKTOP VIEW (>= md): Card 731px x 411px (16:9) dengan dark gradient overlay */}
-              <div className="hidden md:block relative w-full md:w-[731px] md:h-[411px] aspect-[16/9] rounded-md overflow-hidden shadow-sm bg-slate-900">
+              {/* DESKTOP VIEW (>= md): Card Fluid Aspect 16:9 dengan dark gradient overlay */}
+              <div className="hidden md:block relative w-full aspect-[16/9] rounded-md overflow-hidden shadow-sm bg-slate-900">
                 <a
                   href={main.href}
                   onClick={(e) => handleCardClick(e, main)}

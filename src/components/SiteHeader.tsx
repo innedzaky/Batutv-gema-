@@ -13,6 +13,7 @@ interface SiteHeaderProps {
   onGoHome?: () => void;
   // Backwards compatibility
   onOpenLiveStream?: () => void;
+  isCategoryPage?: boolean;
 }
 
 /**
@@ -29,6 +30,7 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
   currentUser,
   onOpenMenu,
   onGoHome,
+  isCategoryPage = false,
 }) => {
   const [settings, setSettings] = useState<SiteSettings>(() => getStoredSiteSettings());
 
@@ -64,7 +66,7 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
         id="s01-site-header"
         className="site-header sticky top-0 md:static z-40 w-full bg-white border-b border-slate-200/80 md:border-slate-100 py-2.5 sm:py-3.5 shadow-xs md:shadow-none transition-shadow"
       >
-        <div className="site-header-container w-full max-w-[1020px] mx-auto px-3.5 sm:px-4 md:px-0 flex items-center justify-between gap-3 sm:gap-6">
+        <div className="site-header-container w-full max-w-[980px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 sm:gap-6">
           
           {/* ========================================================= */}
           {/* S01.1 — BRAND LOGO: BatuTV (Left Aligned)                 */}

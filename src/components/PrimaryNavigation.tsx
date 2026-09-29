@@ -31,6 +31,7 @@ interface PrimaryNavigationProps {
   onOpenLiveStream?: () => void;
   onOpenUserAccount?: () => void;
   onOpenSearch?: () => void;
+  isCategoryPage?: boolean;
 }
 
 /**
@@ -52,6 +53,7 @@ export const PrimaryNavigation: React.FC<PrimaryNavigationProps> = ({
   onOpenLiveStream,
   onOpenUserAccount,
   onOpenSearch,
+  isCategoryPage = false,
 }) => {
   const [navTree, setNavTree] = useState<NavItemWithChildren[]>(() => getPublicNavigationTree());
   const [subNavItems, setSubNavItems] = useState<SubNavigationItem[]>(() => getPublicSubNavItems());
@@ -173,7 +175,7 @@ export const PrimaryNavigation: React.FC<PrimaryNavigationProps> = ({
             : 'bg-transparent'
         }`}
       >
-        <div className="w-full max-w-[1020px] mx-auto px-3.5 sm:px-4 md:px-0">
+        <div className="w-full max-w-[980px] mx-auto px-4 sm:px-6 lg:px-8">
           <div
             className={`flex items-center justify-between h-[38px] sm:h-[41px] text-white transition-all duration-200 overflow-visible ${
               isScrolled
@@ -379,7 +381,7 @@ export const PrimaryNavigation: React.FC<PrimaryNavigationProps> = ({
             : 'bg-transparent py-0'
         }`}
       >
-        <div className="w-full max-w-[1020px] mx-auto px-3.5 sm:px-4 md:px-0">
+        <div className="w-full max-w-[980px] mx-auto px-4 sm:px-6 lg:px-8">
           <div
             className={`w-full flex items-center gap-3 overflow-hidden py-1 px-1 sm:px-2 ${
               isScrolled

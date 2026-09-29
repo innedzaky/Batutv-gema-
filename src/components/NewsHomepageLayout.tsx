@@ -39,30 +39,30 @@ export const NewsHomepageLayout: React.FC<NewsHomepageLayoutProps> = ({
       id="pixel-scaled-homepage-layout"
       className={`w-full flex-1 flex flex-col items-center select-none font-sans ${className}`}
     >
-      {/* Top Bar / Topics Area (Full width restricted to max 1020px) */}
+      {/* Top Bar / Topics Area (Full width restricted to max 980px) */}
       {topBar && (
         <section aria-label="Topik Hangat Portal" className="w-full">
-          <div className="w-full max-w-[1020px] mx-auto px-3.5 sm:px-4 md:px-0">
+          <div className="w-full max-w-[980px] mx-auto px-4 sm:px-6 lg:px-8">
             {topBar}
           </div>
         </section>
       )}
 
-      {/* Hero Headline Section (Full width restricted to max 1020px) */}
+      {/* Hero Headline Section (Full width restricted to max 980px) */}
       {heroHeadline && (
         <section aria-label="Berita Utama & Headline Portal" className="w-full">
-          <div className="w-full max-w-[1020px] mx-auto px-3.5 sm:px-4 md:px-0">
+          <div className="w-full max-w-[980px] mx-auto px-4 sm:px-6 lg:px-8">
             {heroHeadline}
           </div>
         </section>
       )}
 
-      {/* Main 2-Column Grid Container (1020px = 731px Main + 34px Gap + 255px Sidebar) */}
+      {/* Main 2-Column Grid Container (980px container) */}
       {(mainContent || sidebarContent) && (
-        <div className="w-full max-w-[1020px] mx-auto px-3.5 sm:px-4 md:px-0 pt-2 pb-12">
-          <div className="w-full flex flex-col md:flex-row items-start md:gap-[34px] gap-8">
-            {/* Left Column (Main Content Area): 731px on desktop */}
-            <div className="w-full md:w-[731px] md:max-w-[731px] md:shrink-0 flex flex-col space-y-8 sm:space-y-10">
+        <div className="w-full max-w-[980px] mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-12">
+          <div className="w-full flex flex-col md:flex-row items-start md:gap-6 gap-8">
+            {/* Left Column (Main Content Area): Fluid on desktop */}
+            <div className="w-full md:flex-1 md:min-w-0 flex flex-col space-y-8 sm:space-y-10">
               {mainContent}
             </div>
 
@@ -79,7 +79,7 @@ export const NewsHomepageLayout: React.FC<NewsHomepageLayoutProps> = ({
 
       {/* Fallback Direct Children Rendering */}
       {children && (
-        <div className="w-full max-w-[1020px] mx-auto px-3.5 sm:px-4 md:px-0">
+        <div className="w-full max-w-[980px] mx-auto px-4 sm:px-6 lg:px-8">
           {children}
         </div>
       )}
