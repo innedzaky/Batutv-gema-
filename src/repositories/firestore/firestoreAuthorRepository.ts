@@ -158,4 +158,6 @@ export class FirestoreAuthorRepository implements IAuthorRepository {
   }
 }
 
-export const firestoreAuthorRepository = new FirestoreAuthorRepository();
+import { supabaseAuthorRepository } from '../supabase/supabaseAuthorRepository';
+export const firestoreAuthorRepository: IAuthorRepository = supabaseAuthorRepository;
+

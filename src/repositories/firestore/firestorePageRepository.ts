@@ -143,4 +143,6 @@ export class FirestorePageRepository implements IPageRepository {
   }
 }
 
-export const firestorePageRepository = new FirestorePageRepository();
+import { supabasePageRepository } from '../supabase/supabasePageRepository';
+export const firestorePageRepository: IPageRepository = supabasePageRepository;
+

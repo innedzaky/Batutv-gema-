@@ -254,4 +254,6 @@ export class FirestoreArticleRepository implements IArticleRepository {
   }
 }
 
-export const firestoreArticleRepository = new FirestoreArticleRepository();
+import { supabaseArticleRepository } from '../supabase/supabaseArticleRepository';
+export const firestoreArticleRepository: IArticleRepository = supabaseArticleRepository;
+

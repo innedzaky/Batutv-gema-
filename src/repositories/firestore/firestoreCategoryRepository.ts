@@ -144,4 +144,6 @@ export class FirestoreCategoryRepository implements ICategoryRepository {
   }
 }
 
-export const firestoreCategoryRepository = new FirestoreCategoryRepository();
+import { supabaseCategoryRepository } from '../supabase/supabaseCategoryRepository';
+export const firestoreCategoryRepository: ICategoryRepository = supabaseCategoryRepository;
+

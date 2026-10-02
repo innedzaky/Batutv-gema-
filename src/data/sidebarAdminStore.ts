@@ -4,8 +4,7 @@ import {
   ArticleSidebarConfig,
   VideoSidebarConfig,
 } from '../types/sidebar';
-import { db } from '../lib/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { supabaseSidebarRepository } from '../repositories/supabase/supabaseSidebarRepository';
 
 export const SIDEBAR_STORAGE_KEY = 'batutv_sidebar_settings';
 export const SIDEBAR_UPDATED_EVENT = 'batutv_sidebar_updated';
@@ -155,14 +154,13 @@ export async function saveSidebarSettings(newSettings: GlobalSidebarSettings): P
     }
   }
 
-  // Sync to Firestore in background
+  // Sync to Supabase in background
   try {
-    if (db) {
-      const docRef = doc(db, 'site_settings', 'sidebar');
-      await setDoc(docRef, updated, { merge: true });
-    }
+    supabaseSidebarRepository.saveSettings(updated).catch((err) => {
+      console.warn('Gagal sinkronisasi sidebar settings ke Supabase:', err);
+    });
   } catch (err) {
-    console.warn('Gagal sinkronisasi sidebar settings ke Firestore (offline fallback aktif):', err);
+    console.warn('Gagal sinkronisasi sidebar settings (offline fallback aktif):', err);
   }
 
   return true;
@@ -173,34 +171,22 @@ export function resetSidebarSettings(): GlobalSidebarSettings {
   if (typeof window !== 'undefined') {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(INITIAL_SIDEBAR_SETTINGS));
     window.dispatchEvent(new CustomEvent(SIDEBAR_UPDATED_EVENT, { detail: INITIAL_SIDEBAR_SETTINGS }));
+    supabaseSidebarRepository.saveSettings(INITIAL_SIDEBAR_SETTINGS).catch(() => {});
   }
   return INITIAL_SIDEBAR_SETTINGS;
 }
 
-// Initial Firestore listener setup in browser
+// Initial Supabase listener setup in browser
 if (typeof window !== 'undefined') {
   try {
-    if (db) {
-      const docRef = doc(db, 'site_settings', 'sidebar');
-      getDoc(docRef).then((snap) => {
-        if (snap.exists()) {
-          const data = snap.data() as Partial<GlobalSidebarSettings>;
-          if (data && data.homepage) {
-            inMemorySettings = {
-              homepage: { ...INITIAL_HOMEPAGE_SIDEBAR, ...(data.homepage || {}) },
-              article: { ...INITIAL_ARTICLE_SIDEBAR, ...(data.article || {}) },
-              video: { ...INITIAL_VIDEO_SIDEBAR, ...(data.video || {}) },
-              updatedAt: data.updatedAt || new Date().toISOString(),
-            };
-            localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(inMemorySettings));
-            window.dispatchEvent(new CustomEvent(SIDEBAR_UPDATED_EVENT, { detail: inMemorySettings }));
-          }
-        }
-      }).catch((e) => {
-        console.warn('Info: Menggunakan sidebar store offline/lokal:', e);
-      });
-    }
+    supabaseSidebarRepository.subscribe((settings) => {
+      if (settings && settings.homepage) {
+        inMemorySettings = settings;
+        localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(settings));
+        window.dispatchEvent(new CustomEvent(SIDEBAR_UPDATED_EVENT, { detail: settings }));
+      }
+    });
   } catch (_e) {
-    // Ignore firestore init error in non-configured env
+    // Ignore error in non-configured env
   }
 }

@@ -214,4 +214,6 @@ export class FirestoreUserRepository implements IUserRepository {
   }
 }
 
-export const firestoreUserRepository = new FirestoreUserRepository();
+import { supabaseUserRepository } from '../supabase/supabaseUserRepository';
+export const firestoreUserRepository: IUserRepository = supabaseUserRepository;
+

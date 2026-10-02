@@ -257,4 +257,6 @@ export class FirestoreVideoRepository implements IVideoRepository {
   }
 }
 
-export const firestoreVideoRepository = new FirestoreVideoRepository();
+import { supabaseVideoRepository } from '../supabase/supabaseVideoRepository';
+export const firestoreVideoRepository: IVideoRepository = supabaseVideoRepository;
+

@@ -256,4 +256,6 @@ export class FirestoreNavigationRepository implements INavigationRepository {
   }
 }
 
-export const firestoreNavigationRepository = new FirestoreNavigationRepository();
+import { supabaseNavigationRepository } from '../supabase/supabaseNavigationRepository';
+export const firestoreNavigationRepository: INavigationRepository = supabaseNavigationRepository;
+

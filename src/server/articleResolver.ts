@@ -1,6 +1,7 @@
 import { initialAdminArticles } from '../data/newsAdminDummyData';
 import { allNewsArticles } from '../data/dummyNews';
 import { INITIAL_SITE_SETTINGS } from '../data/siteSettingsStore';
+import { supabase } from '../lib/supabase';
 
 export interface ServerArticleMeta {
   id: string;
@@ -71,7 +72,36 @@ export async function getArticleForServerAsync(slugOrPath?: string, domainOverri
   const baseDomain = (domainOverride && domainOverride.trim()) || INITIAL_SITE_SETTINGS.identity.mainDomain || 'https://batutv.com';
   const nowIso = new Date().toISOString();
 
-  // 1. Try Firestore REST API
+  // 1. Try Supabase PostgreSQL Database
+  try {
+    const { data: supaArt } = await supabase
+      .from('articles')
+      .select('*')
+      .eq('slug', cleanSlug)
+      .maybeSingle();
+
+    if (supaArt) {
+      const title = supaArt.title || 'Berita BatuTV';
+      const excerpt = supaArt.excerpt || supaArt.meta_description || title;
+      const featuredImage = ensureAbsoluteUrl(supaArt.featured_image, baseDomain);
+      return {
+        id: supaArt.id,
+        title,
+        slug: supaArt.slug || cleanSlug,
+        excerpt,
+        featuredImage,
+        publishedAt: supaArt.published_at || supaArt.created_at || nowIso,
+        updatedAt: supaArt.updated_at || nowIso,
+        author: supaArt.author || 'Redaksi BatuTV',
+        category: supaArt.category || 'Berita',
+        canonicalUrl: supaArt.canonical_url || `${baseDomain}/berita/${cleanSlug}`,
+      };
+    }
+  } catch (supaErr) {
+    console.warn('[articleResolver] Supabase query fallback:', supaErr);
+  }
+
+  // 2. Try Firestore REST API
   try {
     const projectId = process.env.FIREBASE_PROJECT_ID || 'batutv-portal';
     const databaseId = '(default)';

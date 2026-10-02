@@ -189,4 +189,6 @@ export class FirestoreMediaRepository implements IMediaRepository {
   }
 }
 
-export const firestoreMediaRepository = new FirestoreMediaRepository();
+import { supabaseMediaRepository } from '../supabase/supabaseMediaRepository';
+export const firestoreMediaRepository: IMediaRepository = supabaseMediaRepository;
+

@@ -129,4 +129,6 @@ export class FirestoreSiteSettingsRepository implements ISiteSettingsRepository 
   }
 }
 
-export const firestoreSiteSettingsRepository = new FirestoreSiteSettingsRepository();
+import { supabaseSiteSettingsRepository } from '../supabase/supabaseSiteSettingsRepository';
+export const firestoreSiteSettingsRepository: ISiteSettingsRepository = supabaseSiteSettingsRepository;
+

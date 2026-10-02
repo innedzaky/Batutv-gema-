@@ -118,4 +118,6 @@ export class FirestoreFooterRepository implements IFooterRepository {
   }
 }
 
-export const firestoreFooterRepository = new FirestoreFooterRepository();
+import { supabaseFooterRepository } from '../supabase/supabaseFooterRepository';
+export const firestoreFooterRepository: IFooterRepository = supabaseFooterRepository;
+

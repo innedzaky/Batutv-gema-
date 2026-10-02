@@ -148,4 +148,6 @@ export class FirestoreTagRepository implements ITagRepository {
   }
 }
 
-export const firestoreTagRepository = new FirestoreTagRepository();
+import { supabaseTagRepository } from '../supabase/supabaseTagRepository';
+export const firestoreTagRepository: ITagRepository = supabaseTagRepository;
+

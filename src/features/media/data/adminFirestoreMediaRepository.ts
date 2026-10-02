@@ -185,4 +185,6 @@ export class AdminFirestoreMediaRepository implements IMediaRepository {
   }
 }
 
-export const adminFirestoreMediaRepository = new AdminFirestoreMediaRepository();
+import { supabaseMediaRepository } from '@/src/repositories/supabase/supabaseMediaRepository';
+export const adminFirestoreMediaRepository: IMediaRepository = supabaseMediaRepository;
+

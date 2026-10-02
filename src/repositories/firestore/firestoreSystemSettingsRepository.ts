@@ -322,4 +322,6 @@ export class FirestoreSystemSettingsRepository implements ISystemSettingsReposit
   }
 }
 
-export const firestoreSystemSettingsRepository = new FirestoreSystemSettingsRepository();
+import { supabaseSystemSettingsRepository } from '../supabase/supabaseSystemSettingsRepository';
+export const firestoreSystemSettingsRepository: ISystemSettingsRepository = supabaseSystemSettingsRepository;
+

@@ -10,3 +10,4 @@ export * from './ISystemSettingsRepository';
 export * from './IArticleRepository';
 export * from './IVideoRepository';
 export * from './IUserRepository';
+export * from './supabase';

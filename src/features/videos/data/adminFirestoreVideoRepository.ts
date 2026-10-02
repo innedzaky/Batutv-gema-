@@ -246,4 +246,6 @@ export class AdminFirestoreVideoRepository implements IVideoRepository {
   }
 }
 
-export const adminFirestoreVideoRepository = new AdminFirestoreVideoRepository();
+import { supabaseVideoRepository } from '@/src/repositories/supabase/supabaseVideoRepository';
+export const adminFirestoreVideoRepository: IVideoRepository = supabaseVideoRepository;
+
